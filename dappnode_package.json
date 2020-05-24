@@ -1,0 +1,15 @@
+{
+  "name": "jitsi-meet.public.dappnode.eth",
+  "version": "0.1.0",
+  "description": "Dappnode package to self host a Jitsi meet instance https://jitsi.org/jitsi-meet/",
+  "type": "service",
+  "author": "Zied Guesmi",
+  "categories": [
+    "Jitsi",
+    "Video conference"
+  ],
+  "links": {
+    "homepage": "https://github.com/zguesmi/jitsi-meet-dnp"
+  },
+  "license": "GLP-2.0"
+}
