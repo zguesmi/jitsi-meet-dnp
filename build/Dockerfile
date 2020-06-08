@@ -6,12 +6,15 @@ ENV PYTHONDONTWRITEBYTECODE 1
 # Turns off buffering for easier container logging
 ENV PYTHONUNBUFFERED 1
 
-# Install pip requirements
+# Install requirements
+RUN apk add bash
 RUN python -m pip install docker
 
-RUN mkdir -p ~/.jitsi-meet-cfg/{web/letsencrypt,transcripts,prosody/config,prosody/prosody-plugins-custom,jicofo,jvb,jigasi,jibri}
+ENV CONFIG ~/.jitsi-meet-cfg
+RUN bash -c "mkdir -p ${CONFIG}/{web/letsencrypt,transcripts,prosody/config,prosody/prosody-plugins-custom,jicofo,jvb,jigasi,jibri}"
+RUN echo $CONFIG
 
 COPY start.py /start.py
 
-EXPOSE 80 443
+EXPOSE ${HTTP_PORT} ${HTTPS_PORT}
 CMD ["python", "/start.py"]
