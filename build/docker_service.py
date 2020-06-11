@@ -1,42 +1,84 @@
 import os
-import docker
 
 
-version = "stable-4548"
+VERSION = os.getenv("STACK_VERSION")
 CONFIG = os.getenv("CONFIG")
 HTTP_PORT = os.getenv("HTTP_PORT")
 HTTPS_PORT = os.getenv("HTTPS_PORT")
 DOCKER_NETWORK = "meet.jitsi"
 
-web_env = {
-    "ENABLE_AUTH" : os.getenv("ENABLE_AUTH"),
-    "ENABLE_GUESTS" : os.getenv("ENABLE_GUESTS"),
-    "ENABLE_LETSENCRYPT" : os.getenv("ENABLE_LETSENCRYPT"),
-    "ENABLE_HTTP_REDIRECT" : os.getenv("ENABLE_HTTP_REDIRECT"),
-    "ENABLE_TRANSCRIPTIONS" : os.getenv("ENABLE_TRANSCRIPTIONS"),
-    "DISABLE_HTTPS" : os.getenv("DISABLE_HTTPS"),
-    "JICOFO_AUTH_USER" : os.getenv("JICOFO_AUTH_USER"),
-    "LETSENCRYPT_DOMAIN" : os.getenv("LETSENCRYPT_DOMAIN"),
-    "LETSENCRYPT_EMAIL" : os.getenv("LETSENCRYPT_EMAIL"),
-    "PUBLIC_URL" : os.getenv("PUBLIC_URL"),
-    "XMPP_DOMAIN" : os.getenv("XMPP_DOMAIN"),
-    "XMPP_AUTH_DOMAIN" : os.getenv("XMPP_AUTH_DOMAIN"),
-    "XMPP_BOSH_URL_BASE" : os.getenv("XMPP_BOSH_URL_BASE"),
-    "XMPP_GUEST_DOMAIN" : os.getenv("XMPP_GUEST_DOMAIN"),
-    "XMPP_MUC_DOMAIN" : os.getenv("XMPP_MUC_DOMAIN"),
-    "XMPP_RECORDER_DOMAIN" : os.getenv("XMPP_RECORDER_DOMAIN"),
-    "ETHERPAD_URL_BASE" : os.getenv("ETHERPAD_URL_BASE"),
-    "TZ" : os.getenv("TZ"),
-    "JIBRI_BREWERY_MUC" : os.getenv("JIBRI_BREWERY_MUC"),
-    "JIBRI_PENDING_TIMEOUT" : os.getenv("JIBRI_PENDING_TIMEOUT"),
-    "JIBRI_XMPP_USER" : os.getenv("JIBRI_XMPP_USER"),
-    "JIBRI_XMPP_PASSWORD" : os.getenv("JIBRI_XMPP_PASSWORD"),
-    "JIBRI_RECORDER_USER" : os.getenv("JIBRI_RECORDER_USER"),
-    "JIBRI_RECORDER_PASSWORD" : os.getenv("JIBRI_RECORDER_PASSWORD"),
-    "ENABLE_RECORDING" : os.getenv("ENABLE_RECORDING")
+alpine = {
+    "image": "alpine",
+    "container_name": "alpine",
+    "env": {
+        "VERSION": VERSION
+    },
+    "ports": {
+        800: 80,
+        4430: 443
+    },
+    # "network": "alpine_network",
+    "volumes": {
+        "/home/zied/projects/jitsi-meet-dnp/build/volume": {
+            "bind": "/alpine",
+            "mode": "Z"
+        },
+    }
 }
 
-prosody_env = {
+web = {
+    "image": "jitsi/web:" + VERSION,
+    "env": {
+        "ENABLE_AUTH" : os.getenv("ENABLE_AUTH"),
+        "ENABLE_GUESTS" : os.getenv("ENABLE_GUESTS"),
+        "ENABLE_LETSENCRYPT" : os.getenv("ENABLE_LETSENCRYPT"),
+        "ENABLE_HTTP_REDIRECT" : os.getenv("ENABLE_HTTP_REDIRECT"),
+        "ENABLE_TRANSCRIPTIONS" : os.getenv("ENABLE_TRANSCRIPTIONS"),
+        "DISABLE_HTTPS" : os.getenv("DISABLE_HTTPS"),
+        "JICOFO_AUTH_USER" : os.getenv("JICOFO_AUTH_USER"),
+        "LETSENCRYPT_DOMAIN" : os.getenv("LETSENCRYPT_DOMAIN"),
+        "LETSENCRYPT_EMAIL" : os.getenv("LETSENCRYPT_EMAIL"),
+        "PUBLIC_URL" : os.getenv("PUBLIC_URL"),
+        "XMPP_DOMAIN" : os.getenv("XMPP_DOMAIN"),
+        "XMPP_AUTH_DOMAIN" : os.getenv("XMPP_AUTH_DOMAIN"),
+        "XMPP_BOSH_URL_BASE" : os.getenv("XMPP_BOSH_URL_BASE"),
+        "XMPP_GUEST_DOMAIN" : os.getenv("XMPP_GUEST_DOMAIN"),
+        "XMPP_MUC_DOMAIN" : os.getenv("XMPP_MUC_DOMAIN"),
+        "XMPP_RECORDER_DOMAIN" : os.getenv("XMPP_RECORDER_DOMAIN"),
+        "ETHERPAD_URL_BASE" : os.getenv("ETHERPAD_URL_BASE"),
+        "TZ" : os.getenv("TZ"),
+        "JIBRI_BREWERY_MUC" : os.getenv("JIBRI_BREWERY_MUC"),
+        "JIBRI_PENDING_TIMEOUT" : os.getenv("JIBRI_PENDING_TIMEOUT"),
+        "JIBRI_XMPP_USER" : os.getenv("JIBRI_XMPP_USER"),
+        "JIBRI_XMPP_PASSWORD" : os.getenv("JIBRI_XMPP_PASSWORD"),
+        "JIBRI_RECORDER_USER" : os.getenv("JIBRI_RECORDER_USER"),
+        "JIBRI_RECORDER_PASSWORD" : os.getenv("JIBRI_RECORDER_PASSWORD"),
+        "ENABLE_RECORDING" : os.getenv("ENABLE_RECORDING")
+    },
+    "ports": {
+        HTTP_PORT: 80,
+        HTTPS_PORT: 443
+    },
+    "network": DOCKER_NETWORK,
+    # aliases:
+    #   - ${XMPP_DOMAIN}
+    "volumes": {
+        f"{CONFIG}/web": {
+            "bind": "/config",
+            "mode": "Z"
+        },
+        f"{CONFIG}/web/letsencrypt": {
+            "bind": "/etc/letsencrypt",
+            "mode": "Z"
+        },
+        f"{CONFIG}/transcripts": {
+            "bind": "/usr/share/jitsi-meet/transcripts",
+            "mode": "Z"
+        },
+    }
+}
+
+prosody = {
     "AUTH_TYPE" : os.getenv("AUTH_TYPE"),
     "ENABLE_AUTH" : os.getenv("ENABLE_AUTH"),
     "ENABLE_GUESTS" : os.getenv("ENABLE_GUESTS"),
@@ -87,7 +129,7 @@ prosody_env = {
     "TZ" : os.getenv("TZ")
 }
 
-jicofo_env = {
+jicofo = {
     "AUTH_TYPE" : os.getenv("AUTH_TYPE"),
     "ENABLE_AUTH" : os.getenv("ENABLE_AUTH"),
     "XMPP_DOMAIN" : os.getenv("XMPP_DOMAIN"),
@@ -121,67 +163,3 @@ jvb = {
     "JVB_ENABLE_APIS" : os.getenv("JVB_ENABLE_APIS"),
     "TZ" : os.getenv("TZ")
 }
-
-alpine = {
-    "image": "alpine",
-    "env": {"TEST": "ALPINE_ENV"},
-    "ports": {
-        800: 80,
-        4430: 443
-    },
-    # "network": "alpine_network",
-    # "volumes": {
-    #     "/tmp/alpine": {
-    #         "bind": "/alpine",
-    #         "mode": "Z"
-    #     },
-    # }
-}
-
-web = {
-    "image": "jitsi/web:" + version,
-    "env": web_env,
-    "ports": {
-        HTTP_PORT: 80,
-        HTTPS_PORT: 443
-    },
-    "network": DOCKER_NETWORK,
-    # aliases:
-    #   - ${XMPP_DOMAIN}
-    "volumes": {
-        f"{CONFIG}/web": {
-            "bind": "/config",
-            "mode": "Z"
-        },
-        f"{CONFIG}/web/letsencrypt": {
-            "bind": "/etc/letsencrypt",
-            "mode": "Z"
-        },
-        f"{CONFIG}/transcripts": {
-            "bind": "/usr/share/jitsi-meet/transcripts",
-            "mode": "Z"
-        },
-    }
-}
-
-client = docker.from_env()
-# container = client.containers.run(
-#     web.get("image"),
-#     environment=web.get("env"),
-#     ports=web.get("ports"),
-#     network=web.get("network"),
-#     volumes=web.get("volumes"),
-#     detach=True
-# )
-
-container = client.containers.run(
-    alpine.get("image"),
-    # command="sleep 5000",
-    environment=alpine.get("env"),
-    ports=alpine.get("ports"),
-    network=alpine.get("network"),
-    volumes=alpine.get("volumes"),
-    detach=True
-)
-
-print(container.id)
