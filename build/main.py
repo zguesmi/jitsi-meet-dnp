@@ -1,24 +1,14 @@
 import logging
 import os
 import docker
-import secrets
-import string
 import services
 
 
-version = "stable-4548"
-CONFIG = os.getenv("CONFIG")
-HTTP_PORT = os.getenv("HTTP_PORT")
-HTTPS_PORT = os.getenv("HTTPS_PORT")
-DOCKER_NETWORK = "meet.jitsi"
-
-def generate_random_password():
-    alphabet = string.ascii_letters + string.digits
-    return ''.join(secrets.choice(alphabet) for i in range(16))
-
 if __name__ == "__main__":
     client = docker.from_env()
-    client.networks.create(services.docker_network_name)
+
+    # create docker network
+    client.networks.create(services.docker_network_name, driver="bridge")
 
     alpine = services.alpine
 

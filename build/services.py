@@ -1,11 +1,24 @@
 import os
+import secrets
+import string
 
+
+def generate_random_password():
+    alphabet = string.ascii_letters + string.digits
+    return ''.join(secrets.choice(alphabet) for i in range(16))
 
 stack_version = os.getenv("STACK_VERSION")
 docker_network_name = "meet.jitsi"
 http_port = os.getenv("HTTP_PORT")
 https_port = os.getenv("HTTPS_PORT")
 config_folder = os.getenv("CONFIG")
+
+jicofo_component_secret = generate_random_password()
+jicofo_auth_password = generate_random_password()
+jvb_auth_password = generate_random_password()
+jigasi_xmpp_password = generate_random_password()
+jibri_recorded_password = generate_random_password()
+jibri_xmpp_password = generate_random_password()
 
 alpine = {
     "image": "alpine",
@@ -17,7 +30,7 @@ alpine = {
         800: 80,
         4430: 443
     },
-    # "network": "alpine_network",
+    "network": docker_network_name,
     "volumes": {
         "/home/zied/projects/jitsi-meet-dnp/build/volume": {
             "bind": "/alpine",
@@ -50,9 +63,9 @@ web = {
         "JIBRI_BREWERY_MUC" : os.getenv("JIBRI_BREWERY_MUC"),
         "JIBRI_PENDING_TIMEOUT" : os.getenv("JIBRI_PENDING_TIMEOUT"),
         "JIBRI_XMPP_USER" : os.getenv("JIBRI_XMPP_USER"),
-        "JIBRI_XMPP_PASSWORD" : os.getenv("JIBRI_XMPP_PASSWORD"),
+        "JIBRI_XMPP_PASSWORD" : jibri_xmpp_password,
         "JIBRI_RECORDER_USER" : os.getenv("JIBRI_RECORDER_USER"),
-        "JIBRI_RECORDER_PASSWORD" : os.getenv("JIBRI_RECORDER_PASSWORD"),
+        "JIBRI_RECORDER_PASSWORD" : jibri_recorded_password,
         "ENABLE_RECORDING" : os.getenv("ENABLE_RECORDING")
     },
     "ports": {
@@ -106,17 +119,17 @@ prosody = {
     "XMPP_MUC_MODULES" : os.getenv("XMPP_MUC_MODULES"),
     "XMPP_INTERNAL_MUC_MODULES" : os.getenv("XMPP_INTERNAL_MUC_MODULES"),
     "XMPP_RECORDER_DOMAIN" : os.getenv("XMPP_RECORDER_DOMAIN"),
-    "JICOFO_COMPONENT_SECRET" : os.getenv("JICOFO_COMPONENT_SECRET"),
+    "JICOFO_COMPONENT_SECRET" : jicofo_component_secret,
     "JICOFO_AUTH_USER" : os.getenv("JICOFO_AUTH_USER"),
-    "JICOFO_AUTH_PASSWORD" : os.getenv("JICOFO_AUTH_PASSWORD"),
+    "JICOFO_AUTH_PASSWORD" : jicofo_auth_password,
     "JVB_AUTH_USER" : os.getenv("JVB_AUTH_USER"),
-    "JVB_AUTH_PASSWORD" : os.getenv("JVB_AUTH_PASSWORD"),
+    "JVB_AUTH_PASSWORD" : jvb_auth_password,
     "JIGASI_XMPP_USER" : os.getenv("JIGASI_XMPP_USER"),
-    "JIGASI_XMPP_PASSWORD" : os.getenv("JIGASI_XMPP_PASSWORD"),
+    "JIGASI_XMPP_PASSWORD" : jigasi_xmpp_password,
     "JIBRI_XMPP_USER" : os.getenv("JIBRI_XMPP_USER"),
-    "JIBRI_XMPP_PASSWORD" : os.getenv("JIBRI_XMPP_PASSWORD"),
+    "JIBRI_XMPP_PASSWORD" : jibri_xmpp_password,
     "JIBRI_RECORDER_USER" : os.getenv("JIBRI_RECORDER_USER"),
-    "JIBRI_RECORDER_PASSWORD" : os.getenv("JIBRI_RECORDER_PASSWORD"),
+    "JIBRI_RECORDER_PASSWORD" : jibri_recorded_password,
     "JWT_APP_ID" : os.getenv("JWT_APP_ID"),
     "JWT_APP_SECRET" : os.getenv("JWT_APP_SECRET"),
     "JWT_ACCEPTED_ISSUERS" : os.getenv("JWT_ACCEPTED_ISSUERS"),
@@ -136,9 +149,9 @@ jicofo = {
     "XMPP_AUTH_DOMAIN" : os.getenv("XMPP_AUTH_DOMAIN"),
     "XMPP_INTERNAL_MUC_DOMAIN" : os.getenv("XMPP_INTERNAL_MUC_DOMAIN"),
     "XMPP_SERVER" : os.getenv("XMPP_SERVER"),
-    "JICOFO_COMPONENT_SECRET" : os.getenv("JICOFO_COMPONENT_SECRET"),
+    "JICOFO_COMPONENT_SECRET" : jicofo_component_secret,
     "JICOFO_AUTH_USER" : os.getenv("JICOFO_AUTH_USER"),
-    "JICOFO_AUTH_PASSWORD" : os.getenv("JICOFO_AUTH_PASSWORD"),
+    "JICOFO_AUTH_PASSWORD" : jicofo_auth_password,
     "JICOFO_RESERVATION_REST_BASE_URL" : os.getenv("JICOFO_RESERVATION_REST_BASE_URL"),
     "JVB_BREWERY_MUC" : os.getenv("JVB_BREWERY_MUC"),
     "JIGASI_BREWERY_MUC" : os.getenv("JIGASI_BREWERY_MUC"),
@@ -154,7 +167,7 @@ jvb = {
     "XMPP_INTERNAL_MUC_DOMAIN" : os.getenv("XMPP_INTERNAL_MUC_DOMAIN"),
     "XMPP_SERVER" : os.getenv("XMPP_SERVER"),
     "JVB_AUTH_USER" : os.getenv("JVB_AUTH_USER"),
-    "JVB_AUTH_PASSWORD" : os.getenv("JVB_AUTH_PASSWORD"),
+    "JVB_AUTH_PASSWORD" : jvb_auth_password,
     "JVB_BREWERY_MUC" : os.getenv("JVB_BREWERY_MUC"),
     "JVB_PORT" : os.getenv("JVB_PORT"),
     "JVB_TCP_HARVESTER_DISABLED" : os.getenv("JVB_TCP_HARVESTER_DISABLED"),
