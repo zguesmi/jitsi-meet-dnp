@@ -1,16 +1,16 @@
 import logging
 import os
 import docker
-import services
+import jitsi
 
 
 if __name__ == "__main__":
     client = docker.from_env()
 
     # create docker network
-    client.networks.create(services.docker_network_name, driver="bridge")
+    client.networks.create(jitsi.docker_network_name, driver="bridge")
 
-    alpine = services.alpine
+    alpine = jitsi.alpine
 
     container = client.containers.run(
         alpine.get("image"),
