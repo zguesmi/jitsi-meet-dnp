@@ -1,17 +1,17 @@
 import os
 
 
-VERSION = os.getenv("STACK_VERSION")
-CONFIG = os.getenv("CONFIG")
-HTTP_PORT = os.getenv("HTTP_PORT")
-HTTPS_PORT = os.getenv("HTTPS_PORT")
-DOCKER_NETWORK = "meet.jitsi"
+stack_version = os.getenv("STACK_VERSION")
+docker_network_name = "meet.jitsi"
+http_port = os.getenv("HTTP_PORT")
+https_port = os.getenv("HTTPS_PORT")
+config_folder = os.getenv("CONFIG")
 
 alpine = {
     "image": "alpine",
     "container_name": "alpine",
     "env": {
-        "VERSION": VERSION
+        "VERSION": stack_version
     },
     "ports": {
         800: 80,
@@ -27,7 +27,7 @@ alpine = {
 }
 
 web = {
-    "image": "jitsi/web:" + VERSION,
+    "image": "jitsi/web:" + stack_version,
     "env": {
         "ENABLE_AUTH" : os.getenv("ENABLE_AUTH"),
         "ENABLE_GUESTS" : os.getenv("ENABLE_GUESTS"),
@@ -56,22 +56,22 @@ web = {
         "ENABLE_RECORDING" : os.getenv("ENABLE_RECORDING")
     },
     "ports": {
-        HTTP_PORT: 80,
-        HTTPS_PORT: 443
+        http_port: 80,
+        https_port: 443
     },
-    "network": DOCKER_NETWORK,
+    "network": docker_network_name,
     # aliases:
     #   - ${XMPP_DOMAIN}
     "volumes": {
-        f"{CONFIG}/web": {
+        f"{config_folder}/web": {
             "bind": "/config",
             "mode": "Z"
         },
-        f"{CONFIG}/web/letsencrypt": {
+        f"{config_folder}/web/letsencrypt": {
             "bind": "/etc/letsencrypt",
             "mode": "Z"
         },
-        f"{CONFIG}/transcripts": {
+        f"{config_folder}/transcripts": {
             "bind": "/usr/share/jitsi-meet/transcripts",
             "mode": "Z"
         },

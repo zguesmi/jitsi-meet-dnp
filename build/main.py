@@ -3,7 +3,7 @@ import os
 import docker
 import secrets
 import string
-import docker_service
+import services
 
 
 version = "stable-4548"
@@ -18,9 +18,9 @@ def generate_random_password():
 
 if __name__ == "__main__":
     client = docker.from_env()
-    client.networks.create()
+    client.networks.create(services.docker_network_name)
 
-    alpine = docker_service.alpine
+    alpine = services.alpine
 
     container = client.containers.run(
         alpine.get("image"),
