@@ -3,8 +3,6 @@ import os
 import secrets
 import string
 
-# def info(message):
-#     print("[info] " + message)
 
 logging.basicConfig(level=logging.INFO)
 
@@ -12,11 +10,11 @@ def generate_random_password():
     alphabet = string.ascii_letters + string.digits
     return ''.join(secrets.choice(alphabet) for i in range(16))
 
-docker_network_name = "meet.jitsi"
-stack_version = os.getenv("STACK_VERSION")
-http_port = os.getenv("HTTP_PORT")
-https_port = os.getenv("HTTPS_PORT")
-config_folder = os.getenv("CONFIG")
+# docker_network_name = "meet.jitsi"
+# stack_version = os.getenv("STACK_VERSION")
+# http_port = os.getenv("HTTP_PORT")
+# https_port = os.getenv("HTTPS_PORT")
+# config_folder = os.getenv("CONFIG")
 
 jicofo_component_secret = generate_random_password()
 logging.info("jicofo_component_secret: " + jicofo_component_secret)
@@ -56,8 +54,10 @@ web = {
     "image": "jitsi/web:" + stack_version,
     "container_name": "jitsi-web",
     "ports": {
-        http_port: 80,
-        https_port: 443
+        int(http_port): 80,
+        int(https_port): 443
+        # 80: 80,
+        # 443: 443
     },
     "volumes": {
         f"{config_folder}/web": {
@@ -103,16 +103,20 @@ web = {
     "network": docker_network_name,
     # aliases:
     #   - ${XMPP_DOMAIN}
+    "restart_policy": {
+        "Name": os.getenv("RESTART_POLICY"),
+        "MaximumRetryCount": 5
+    }
 }
 
 prosody = {
     "image": "jitsi/prosody:" + stack_version,
     "container_name": "jitsi-prosody",
-    "ports": [
-      "5222",
-      "5347",
-      "5280"
-    ],
+    "ports": {
+      5222:5222,
+      5347:5347,
+      5280:5280
+    },
     "volumes": {
         f"{config_folder}/prosody/config": {
             "bind": "/config",
@@ -173,7 +177,8 @@ prosody = {
         "LOG_LEVEL" : os.getenv("LOG_LEVEL"),
         "TZ" : os.getenv("TZ")
     },
-    "network": docker_network_name
+    "network": docker_network_name,
+    "restart": os.getenv("RESTART_POLICY")
 }
 
 jicofo = {
@@ -203,14 +208,15 @@ jicofo = {
         "JIBRI_PENDING_TIMEOUT" : os.getenv("JIBRI_PENDING_TIMEOUT"),
         "TZ" : os.getenv("TZ"),
     },
-    "network": docker_network_name
+    "network": docker_network_name,
+    "restart": os.getenv("RESTART_POLICY")
 }
 
 jvb = {
     "image": "jitsi/jvb:" + stack_version,
-    "container_name": "jitsi-jicofo",
+    "container_name": "jitsi-jvb",
     "ports": {
-    #   os.getenv("JVB_PORT"): os.getenv("JVB_PORT") + "/udp",
+      os.getenv("JVB_PORT"): os.getenv("JVB_PORT") + "/udp",
       os.getenv("JVB_TCP_MAPPED_PORT"): os.getenv("JVB_TCP_PORT")
     },
     "volumes": {
@@ -234,5 +240,6 @@ jvb = {
         "JVB_ENABLE_APIS" : os.getenv("JVB_ENABLE_APIS"),
         "TZ" : os.getenv("TZ")
     },
-    "network": docker_network_name
+    "network": docker_network_name,
+    "restart": os.getenv("RESTART_POLICY")
 }

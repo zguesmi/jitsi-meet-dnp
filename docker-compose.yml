@@ -16,7 +16,7 @@ services:
       - STACK_VERSION=stable-4548
       - LOG_LEVEL=info
       # Directory where all configuration will be stored
-      - CONFIG=/jitsi-meet-cfg
+      - CONFIG_ROOT_DIR=/jitsi-meet-cfg
       # Exposed HTTP port
       - HTTP_PORT=80
       # Exposed HTTPS port
@@ -230,7 +230,7 @@ services:
       # - ENABLE_HTTP_REDIRECT=1
       # Container restart policy
       # Defaults to unless-stopped
-      - RESTART_POLICY=unless-stopped
+      - RESTART_POLICY=on-failure
       - GLOBAL_MODULES
       - GLOBAL_CONFIG
-    restart: unless-stopped
+    # restart: unless-stopped
