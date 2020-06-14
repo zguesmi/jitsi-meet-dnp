@@ -9,8 +9,6 @@ import env
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
-# TODO: rename jitsi to env
-
 class Jitsi_service():
     def __init__(self, docker_client, image, container_name, ports, volumes, env, restart_policy):
         self.docker_client = docker_client
@@ -69,7 +67,7 @@ class App():
         os.makedirs(self.config_root_dir + "/jibri", exist_ok=True)
 
     def run(self):
-        # should start prosody service first
+        # Jitsi prosody component
         prosody_container = Jitsi_service(
             docker_client=self.client,
             image="jitsi/prosody:" + self.stack_version,
@@ -98,6 +96,7 @@ class App():
         self.docker_network.connect(container=prosody_container, aliases=[self.xmpp_server])
         log.info("Prosody container id: " + prosody_container.id)
 
+        # Jitsi web component
         web_container = Jitsi_service(
             docker_client=self.client,
             image="jitsi/web:" + self.stack_version,
@@ -129,6 +128,7 @@ class App():
         self.docker_network.connect(container=web_container, aliases=[self.internal_xmpp_domain])
         log.info("Web container id: " + web_container.id)
 
+        # Jitsi focus component
         jicofo_container = Jitsi_service(
             docker_client=self.client,
             image="jitsi/jicofo:" + self.stack_version,
@@ -149,6 +149,7 @@ class App():
         self.docker_network.connect(container=jicofo_container)
         log.info("Jicofo container id: " + jicofo_container.id)
 
+        # Jitsi video bridge component
         jvb_container = Jitsi_service(
             docker_client=self.client,
             image="jitsi/jvb:" + self.stack_version,

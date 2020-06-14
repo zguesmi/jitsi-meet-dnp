@@ -1,4 +1,3 @@
-# FROM python:3.8-slim-buster
 FROM python:alpine3.8
 
 # Keeps Python from generating .pyc files in the container
