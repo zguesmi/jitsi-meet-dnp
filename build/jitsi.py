@@ -6,6 +6,7 @@ import time
 import env
 
 
+# TODO: format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
