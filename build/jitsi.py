@@ -11,6 +11,7 @@ logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
 class DockerService():
+
     def __init__(self, docker_client, image, container_name, ports, volumes, env, restart_policy):
         self.docker_client = docker_client
         self.image = image
@@ -47,16 +48,6 @@ class Jitsi():
         self.client = docker.from_env()
         self.docker_network = None
 
-    def create_docker_network(self):
-        try:
-            self.docker_network = self.client.networks.get(self.docker_network_name)
-        except docker.errors.NotFound as e:
-            self.docker_network = self.client.networks.create(self.docker_network_name, driver="bridge")
-        except Exception as e:
-            log.error('Error creating network: ' + self.docker_network_name)
-            log.exception(e)
-            exit(1)
-
     def create_config_tree(self):
         os.makedirs(self.config_root_dir + "/web/letsencrypt", exist_ok=True)
         os.makedirs(self.config_root_dir + "/transcripts", exist_ok=True)
@@ -66,6 +57,16 @@ class Jitsi():
         os.makedirs(self.config_root_dir + "/jvb", exist_ok=True)
         os.makedirs(self.config_root_dir + "/jigasi", exist_ok=True)
         os.makedirs(self.config_root_dir + "/jibri", exist_ok=True)
+
+    def create_docker_network(self):
+        try:
+            self.docker_network = self.client.networks.get(self.docker_network_name)
+        except docker.errors.NotFound as e:
+            self.docker_network = self.client.networks.create(self.docker_network_name, driver="bridge")
+        except Exception as e:
+            log.error('Error creating network: ' + self.docker_network_name)
+            log.exception(e)
+            exit(1)
 
     """
     Jitsi XMPP component.
