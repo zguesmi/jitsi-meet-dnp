@@ -9,7 +9,7 @@ import env
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
-class Jitsi_service():
+class DockerService():
     def __init__(self, docker_client, image, container_name, ports, volumes, env, restart_policy):
         self.docker_client = docker_client
         self.image = image
@@ -32,7 +32,7 @@ class Jitsi_service():
         )
 
 
-class App():
+class Jitsi():
 
     def __init__(self):
         self.config_root_dir = os.getenv("CONFIG_ROOT_DIR")
@@ -42,7 +42,7 @@ class App():
         self.xmpp_server = os.getenv("XMPP_SERVER")
         self.http_port = os.getenv("HTTP_PORT")
         self.https_port = os.getenv("HTTPS_PORT")
-        self.docker_network_name = "meet.jitsi"
+        self.docker_network_name = os.getenv("DOCKER_NETWORK_NAME")
         self.client = docker.from_env()
         self.docker_network = None
 
@@ -66,16 +66,18 @@ class App():
         os.makedirs(self.config_root_dir + "/jigasi", exist_ok=True)
         os.makedirs(self.config_root_dir + "/jibri", exist_ok=True)
 
-    def run(self):
-        # Jitsi prosody component
-        prosody_container = Jitsi_service(
+    """
+    Jitsi prosody component.
+    """
+    def start_prosody(self):
+        prosody_container = DockerService(
             docker_client=self.client,
             image="jitsi/prosody:" + self.stack_version,
             container_name="jitsi-prosody",
             ports={
                 "5222": None,
+                "5280": None,
                 "5347": None,
-                "5280": None
             },
             volumes={
                 f"{self.config_root_dir}/prosody/config": {
@@ -94,10 +96,13 @@ class App():
             }
         ).run()
         self.docker_network.connect(container=prosody_container, aliases=[self.xmpp_server])
-        log.info("Prosody container id: " + prosody_container.id)
+        return prosody_container
 
-        # Jitsi web component
-        web_container = Jitsi_service(
+    """
+    Jitsi web component.
+    """
+    def start_web_component(self):
+        web_container = DockerService(
             docker_client=self.client,
             image="jitsi/web:" + self.stack_version,
             container_name="jitsi-web",
@@ -126,10 +131,13 @@ class App():
             }
         ).run()
         self.docker_network.connect(container=web_container, aliases=[self.internal_xmpp_domain])
-        log.info("Web container id: " + web_container.id)
+        return web_container
 
-        # Jitsi focus component
-        jicofo_container = Jitsi_service(
+    """
+    Jitsi focus component.
+    """
+    def start_jifoco(self):
+        jicofo_container = DockerService(
             docker_client=self.client,
             image="jitsi/jicofo:" + self.stack_version,
             container_name="jitsi-jicofo",
@@ -147,10 +155,13 @@ class App():
             }
         ).run()
         self.docker_network.connect(container=jicofo_container)
-        log.info("Jicofo container id: " + jicofo_container.id)
+        return jicofo_container
 
-        # Jitsi video bridge component
-        jvb_container = Jitsi_service(
+    """
+    Jitsi video bridge component.
+    """
+    def start_jvb(self):
+        jvb_container = DockerService(
             docker_client=self.client,
             image="jitsi/jvb:" + self.stack_version,
             container_name="jitsi-jvb",
@@ -171,19 +182,25 @@ class App():
             }
         ).run()
         self.docker_network.connect(container=jvb_container)
-        log.info("Jvb container id: " + jvb_container.id)
-
-        prosody_container.wait()
+        return jvb_container
 
 if __name__ == "__main__":
-    app = App()
-    log.info("Creating config dirs")
-    app.create_config_tree()
+    jitsi = Jitsi()
+    log.info("Creating config tree dirs")
+    jitsi.create_config_tree()
     log.info("Creating docker network")
-    app.create_docker_network()
+    jitsi.create_docker_network()
     log.info("Starting jitsi services")
 
     try:
-        app.run()
+        prosody_container = jitsi.start_prosody()
+        log.info("Prosody container id: " + prosody_container.id)
+        web_container = jitsi.start_web_component()
+        log.info("Web container id: " + web_container.id)
+        jicofo_container = jitsi.start_jifoco()
+        log.info("Jicofo container id: " + jicofo_container.id)
+        jvb_container = jitsi.start_jvb()
+        log.info("Jvb container id: " + jvb_container.id)
+        prosody_container.wait()
     except Exception as e:
         log.exception(e)
