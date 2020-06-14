@@ -3,7 +3,7 @@
 version: "3.4"
 
 services:
-  jitsi-meet.public.dappnode.eth:
+  web:
     image: jitsi/web:stable-4548
     restart: ${RESTART_POLICY}
     ports:

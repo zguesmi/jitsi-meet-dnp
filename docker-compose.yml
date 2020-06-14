@@ -22,7 +22,7 @@ services:
       # Exposed HTTPS port
       - HTTPS_PORT=443
       # System time zone
-      - TZ=UTC
+      - TZ=Europe/Paris
       # Public URL for the web service
       # - PUBLIC_URL=https://meet.example.com
       # IP address of the Docker host
@@ -230,7 +230,7 @@ services:
       # - ENABLE_HTTP_REDIRECT=1
       # Container restart policy
       # Defaults to unless-stopped
-      - RESTART_POLICY=on-failure
+  # - RESTART_POLICY=on-failure
       - GLOBAL_MODULES
       - GLOBAL_CONFIG
     # restart: unless-stopped

@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 
 def generate_random_password():
     alphabet = string.ascii_letters + string.digits
-    return ''.join(secrets.choice(alphabet) for i in range(16))
+    return ''.join(secrets.choice(alphabet) for i in range(32))
 
 jicofo_component_secret = generate_random_password()
 log.info("jicofo_component_secret: " + jicofo_component_secret)
@@ -76,127 +76,68 @@ prosody = {
     "TZ" : os.getenv("TZ")
 }
 
-# web = {
-#     "image": "jitsi/web:" + stack_version,
-#     "container_name": "jitsi-web",
-#     "ports": {
-#         int(http_port): 80,
-#         int(https_port): 443
-#         # 80: 80,
-#         # 443: 443
-#     },
-#     "volumes": {
-#         f"{config_folder}/web": {
-#             "bind": "/config",
-#             "mode": "Z"
-#         },
-#         f"{config_folder}/web/letsencrypt": {
-#             "bind": "/etc/letsencrypt",
-#             "mode": "Z"
-#         },
-#         f"{config_folder}/transcripts": {
-#             "bind": "/usr/share/jitsi-meet/transcripts",
-#             "mode": "Z"
-#         },
-#     },
-#     "env": {
-#         "ENABLE_AUTH" : os.getenv("ENABLE_AUTH"),
-#         "ENABLE_GUESTS" : os.getenv("ENABLE_GUESTS"),
-#         "ENABLE_LETSENCRYPT" : os.getenv("ENABLE_LETSENCRYPT"),
-#         "ENABLE_HTTP_REDIRECT" : os.getenv("ENABLE_HTTP_REDIRECT"),
-#         "ENABLE_TRANSCRIPTIONS" : os.getenv("ENABLE_TRANSCRIPTIONS"),
-#         "DISABLE_HTTPS" : os.getenv("DISABLE_HTTPS"),
-#         "JICOFO_AUTH_USER" : os.getenv("JICOFO_AUTH_USER"),
-#         "LETSENCRYPT_DOMAIN" : os.getenv("LETSENCRYPT_DOMAIN"),
-#         "LETSENCRYPT_EMAIL" : os.getenv("LETSENCRYPT_EMAIL"),
-#         "PUBLIC_URL" : os.getenv("PUBLIC_URL"),
-#         "XMPP_DOMAIN" : os.getenv("XMPP_DOMAIN"),
-#         "XMPP_AUTH_DOMAIN" : os.getenv("XMPP_AUTH_DOMAIN"),
-#         "XMPP_BOSH_URL_BASE" : os.getenv("XMPP_BOSH_URL_BASE"),
-#         "XMPP_GUEST_DOMAIN" : os.getenv("XMPP_GUEST_DOMAIN"),
-#         "XMPP_MUC_DOMAIN" : os.getenv("XMPP_MUC_DOMAIN"),
-#         "XMPP_RECORDER_DOMAIN" : os.getenv("XMPP_RECORDER_DOMAIN"),
-#         "ETHERPAD_URL_BASE" : os.getenv("ETHERPAD_URL_BASE"),
-#         "TZ" : os.getenv("TZ"),
-#         "JIBRI_BREWERY_MUC" : os.getenv("JIBRI_BREWERY_MUC"),
-#         "JIBRI_PENDING_TIMEOUT" : os.getenv("JIBRI_PENDING_TIMEOUT"),
-#         "JIBRI_XMPP_USER" : os.getenv("JIBRI_XMPP_USER"),
-#         "JIBRI_XMPP_PASSWORD" : jibri_xmpp_password,
-#         "JIBRI_RECORDER_USER" : os.getenv("JIBRI_RECORDER_USER"),
-#         "JIBRI_RECORDER_PASSWORD" : jibri_recorded_password,
-#         "ENABLE_RECORDING" : os.getenv("ENABLE_RECORDING")
-#     },
-#     "network": docker_network_name,
-#     # aliases:
-#     #   - ${XMPP_DOMAIN}
-#     "restart_policy": {
-#         "Name": os.getenv("RESTART_POLICY"),
-#         "MaximumRetryCount": 5
-#     }
-# }
+web = {
+    "ENABLE_AUTH" : os.getenv("ENABLE_AUTH"),
+    "ENABLE_GUESTS" : os.getenv("ENABLE_GUESTS"),
+    "ENABLE_LETSENCRYPT" : os.getenv("ENABLE_LETSENCRYPT"),
+    "ENABLE_HTTP_REDIRECT" : os.getenv("ENABLE_HTTP_REDIRECT"),
+    "ENABLE_TRANSCRIPTIONS" : os.getenv("ENABLE_TRANSCRIPTIONS"),
+    "DISABLE_HTTPS" : os.getenv("DISABLE_HTTPS"),
+    "JICOFO_AUTH_USER" : os.getenv("JICOFO_AUTH_USER"),
+    "LETSENCRYPT_DOMAIN" : os.getenv("LETSENCRYPT_DOMAIN"),
+    "LETSENCRYPT_EMAIL" : os.getenv("LETSENCRYPT_EMAIL"),
+    "PUBLIC_URL" : os.getenv("PUBLIC_URL"),
+    "XMPP_DOMAIN" : os.getenv("XMPP_DOMAIN"),
+    "XMPP_AUTH_DOMAIN" : os.getenv("XMPP_AUTH_DOMAIN"),
+    "XMPP_BOSH_URL_BASE" : os.getenv("XMPP_BOSH_URL_BASE"),
+    "XMPP_GUEST_DOMAIN" : os.getenv("XMPP_GUEST_DOMAIN"),
+    "XMPP_MUC_DOMAIN" : os.getenv("XMPP_MUC_DOMAIN"),
+    "XMPP_RECORDER_DOMAIN" : os.getenv("XMPP_RECORDER_DOMAIN"),
+    "ETHERPAD_URL_BASE" : os.getenv("ETHERPAD_URL_BASE"),
+    "TZ" : os.getenv("TZ"),
+    "JIBRI_BREWERY_MUC" : os.getenv("JIBRI_BREWERY_MUC"),
+    "JIBRI_PENDING_TIMEOUT" : os.getenv("JIBRI_PENDING_TIMEOUT"),
+    "JIBRI_XMPP_USER" : os.getenv("JIBRI_XMPP_USER"),
+    "JIBRI_XMPP_PASSWORD" : jibri_xmpp_password,
+    "JIBRI_RECORDER_USER" : os.getenv("JIBRI_RECORDER_USER"),
+    "JIBRI_RECORDER_PASSWORD" : jibri_recorded_password,
+    "ENABLE_RECORDING" : os.getenv("ENABLE_RECORDING")
+}
 
-# jicofo = {
-#     "image": "jitsi/jicofo:" + stack_version,
-#     "container_name": "jitsi-jicofo",
-#     "volumes": {
-#         f"{config_folder}/jicofo": {
-#             "bind": "/config",
-#             "mode": "Z"
-#         },
-#     },
-#     "env": {
-#         "AUTH_TYPE" : os.getenv("AUTH_TYPE"),
-#         "ENABLE_AUTH" : os.getenv("ENABLE_AUTH"),
-#         "XMPP_DOMAIN" : os.getenv("XMPP_DOMAIN"),
-#         "XMPP_AUTH_DOMAIN" : os.getenv("XMPP_AUTH_DOMAIN"),
-#         "XMPP_INTERNAL_MUC_DOMAIN" : os.getenv("XMPP_INTERNAL_MUC_DOMAIN"),
-#         "XMPP_SERVER" : os.getenv("XMPP_SERVER"),
-#         "JICOFO_COMPONENT_SECRET" : jicofo_component_secret,
-#         "JICOFO_AUTH_USER" : os.getenv("JICOFO_AUTH_USER"),
-#         "JICOFO_AUTH_PASSWORD" : jicofo_auth_password,
-#         "JICOFO_RESERVATION_REST_BASE_URL" : os.getenv("JICOFO_RESERVATION_REST_BASE_URL"),
-#         "JVB_BREWERY_MUC" : os.getenv("JVB_BREWERY_MUC"),
-#         "JIGASI_BREWERY_MUC" : os.getenv("JIGASI_BREWERY_MUC"),
-#         "JIGASI_SIP_URI" : os.getenv("JIGASI_SIP_URI"),
-#         "JIBRI_BREWERY_MUC" : os.getenv("JIBRI_BREWERY_MUC"),
-#         "JIBRI_PENDING_TIMEOUT" : os.getenv("JIBRI_PENDING_TIMEOUT"),
-#         "TZ" : os.getenv("TZ"),
-#     },
-#     "network": docker_network_name,
-#     "restart": os.getenv("RESTART_POLICY")
-# }
+jicofo = {
+    "AUTH_TYPE" : os.getenv("AUTH_TYPE"),
+    "ENABLE_AUTH" : os.getenv("ENABLE_AUTH"),
+    "XMPP_DOMAIN" : os.getenv("XMPP_DOMAIN"),
+    "XMPP_AUTH_DOMAIN" : os.getenv("XMPP_AUTH_DOMAIN"),
+    "XMPP_INTERNAL_MUC_DOMAIN" : os.getenv("XMPP_INTERNAL_MUC_DOMAIN"),
+    "XMPP_SERVER" : os.getenv("XMPP_SERVER"),
+    "JICOFO_COMPONENT_SECRET" : jicofo_component_secret,
+    "JICOFO_AUTH_USER" : os.getenv("JICOFO_AUTH_USER"),
+    "JICOFO_AUTH_PASSWORD" : jicofo_auth_password,
+    "JICOFO_RESERVATION_REST_BASE_URL" : os.getenv("JICOFO_RESERVATION_REST_BASE_URL"),
+    "JVB_BREWERY_MUC" : os.getenv("JVB_BREWERY_MUC"),
+    "JIGASI_BREWERY_MUC" : os.getenv("JIGASI_BREWERY_MUC"),
+    "JIGASI_SIP_URI" : os.getenv("JIGASI_SIP_URI"),
+    "JIBRI_BREWERY_MUC" : os.getenv("JIBRI_BREWERY_MUC"),
+    "JIBRI_PENDING_TIMEOUT" : os.getenv("JIBRI_PENDING_TIMEOUT"),
+    "TZ" : os.getenv("TZ"),
+}
 
-# jvb = {
-#     "image": "jitsi/jvb:" + stack_version,
-#     "container_name": "jitsi-jvb",
-#     "ports": {
-#       os.getenv("JVB_PORT"): os.getenv("JVB_PORT") + "/udp",
-#       os.getenv("JVB_TCP_MAPPED_PORT"): os.getenv("JVB_TCP_PORT")
-#     },
-#     "volumes": {
-#         f"{config_folder}/jvb": {
-#             "bind": "/config",
-#             "mode": "Z"
-#         },
-#     },
-#     "env": {
-#         "DOCKER_HOST_ADDRESS" : os.getenv("DOCKER_HOST_ADDRESS"),
-#         "XMPP_AUTH_DOMAIN" : os.getenv("XMPP_AUTH_DOMAIN"),
-#         "XMPP_INTERNAL_MUC_DOMAIN" : os.getenv("XMPP_INTERNAL_MUC_DOMAIN"),
-#         "XMPP_SERVER" : os.getenv("XMPP_SERVER"),
-#         "JVB_AUTH_USER" : os.getenv("JVB_AUTH_USER"),
-#         "JVB_AUTH_PASSWORD" : jvb_auth_password,
-#         "JVB_BREWERY_MUC" : os.getenv("JVB_BREWERY_MUC"),
-#         "JVB_PORT" : os.getenv("JVB_PORT"),
-#         "JVB_TCP_HARVESTER_DISABLED" : os.getenv("JVB_TCP_HARVESTER_DISABLED"),
-#         "JVB_TCP_PORT" : os.getenv("JVB_TCP_PORT"),
-#         "JVB_STUN_SERVERS" : os.getenv("JVB_STUN_SERVERS"),
-#         "JVB_ENABLE_APIS" : os.getenv("JVB_ENABLE_APIS"),
-#         "TZ" : os.getenv("TZ")
-#     },
-#     "network": docker_network_name,
-#     "restart": os.getenv("RESTART_POLICY")
-# }
+jvb = {
+    "DOCKER_HOST_ADDRESS" : os.getenv("DOCKER_HOST_ADDRESS"),
+    "XMPP_AUTH_DOMAIN" : os.getenv("XMPP_AUTH_DOMAIN"),
+    "XMPP_INTERNAL_MUC_DOMAIN" : os.getenv("XMPP_INTERNAL_MUC_DOMAIN"),
+    "XMPP_SERVER" : os.getenv("XMPP_SERVER"),
+    "JVB_AUTH_USER" : os.getenv("JVB_AUTH_USER"),
+    "JVB_AUTH_PASSWORD" : jvb_auth_password,
+    "JVB_BREWERY_MUC" : os.getenv("JVB_BREWERY_MUC"),
+    "JVB_PORT" : os.getenv("JVB_PORT"),
+    "JVB_TCP_HARVESTER_DISABLED" : os.getenv("JVB_TCP_HARVESTER_DISABLED"),
+    "JVB_TCP_PORT" : os.getenv("JVB_TCP_PORT"),
+    "JVB_STUN_SERVERS" : os.getenv("JVB_STUN_SERVERS"),
+    "JVB_ENABLE_APIS" : os.getenv("JVB_ENABLE_APIS"),
+    "TZ" : os.getenv("TZ")
+}
 
 
 # alpine = {
