@@ -67,9 +67,9 @@ class Jitsi():
         os.makedirs(self.config_root_dir + "/jibri", exist_ok=True)
 
     """
-    Jitsi prosody component.
+    Jitsi XMPP component.
     """
-    def start_prosody(self):
+    def start_xmpp_server(self):
         prosody_container = DockerService(
             docker_client=self.client,
             image="jitsi/prosody:" + self.stack_version,
@@ -136,7 +136,7 @@ class Jitsi():
     """
     Jitsi focus component.
     """
-    def start_jifoco(self):
+    def start_focus_component(self):
         jicofo_container = DockerService(
             docker_client=self.client,
             image="jitsi/jicofo:" + self.stack_version,
@@ -160,7 +160,7 @@ class Jitsi():
     """
     Jitsi video bridge component.
     """
-    def start_jvb(self):
+    def start_video_bridge(self):
         jvb_container = DockerService(
             docker_client=self.client,
             image="jitsi/jvb:" + self.stack_version,
@@ -193,13 +193,13 @@ if __name__ == "__main__":
     log.info("Starting jitsi services")
 
     try:
-        prosody_container = jitsi.start_prosody()
+        prosody_container = jitsi.start_xmpp_server()
         log.info("Prosody container id: " + prosody_container.id)
         web_container = jitsi.start_web_component()
         log.info("Web container id: " + web_container.id)
-        jicofo_container = jitsi.start_jifoco()
+        jicofo_container = jitsi.start_focus_component()
         log.info("Jicofo container id: " + jicofo_container.id)
-        jvb_container = jitsi.start_jvb()
+        jvb_container = jitsi.start_video_bridge()
         log.info("Jvb container id: " + jvb_container.id)
         prosody_container.wait()
     except Exception as e:
