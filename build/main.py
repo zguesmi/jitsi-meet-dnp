@@ -13,7 +13,24 @@ def create_docker_network():
         print('Error creating network: ' + jitsi.docker_network_name)
         exit()
 
+def create_config_dir():
+    config_folder = os.getenv("CONFIG")
+    os.makedirs(config_folder + "/web/letsencrypt", exist_ok=True)
+    os.makedirs(config_folder + "/transcripts", exist_ok=True)
+    os.makedirs(config_folder + "/prosody/config", exist_ok=True)
+    os.makedirs(config_folder + "/prosody/prosody-plugins-custom", exist_ok=True)
+    os.makedirs(config_folder + "/jicofo", exist_ok=True)
+    os.makedirs(config_folder + "/jvb", exist_ok=True)
+    os.makedirs(config_folder + "/jigasi", exist_ok=True)
+    os.makedirs(config_folder + "/jibri", exist_ok=True)
+
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+    logging.info("### Start")
+    
+    logging.info("Creating config dirs")
+    create_config_dir()
+
     client = docker.from_env()
     create_docker_network()
     alpine = jitsi.alpine
@@ -36,7 +53,6 @@ if __name__ == "__main__":
     container = client.containers.run(
         web.get("image"),
         name=web.get("container_name"),
-        # command="yes",
         environment=web.get("env"),
         ports=web.get("ports"),
         network=web.get("network"),

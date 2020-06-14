@@ -1,7 +1,12 @@
+import logging
 import os
 import secrets
 import string
 
+# def info(message):
+#     print("[info] " + message)
+
+logging.basicConfig(level=logging.INFO)
 
 def generate_random_password():
     alphabet = string.ascii_letters + string.digits
@@ -14,11 +19,17 @@ https_port = os.getenv("HTTPS_PORT")
 config_folder = os.getenv("CONFIG")
 
 jicofo_component_secret = generate_random_password()
+logging.info("jicofo_component_secret: " + jicofo_component_secret)
 jicofo_auth_password = generate_random_password()
+logging.info("jicofo_auth_password: " + jicofo_auth_password)
 jvb_auth_password = generate_random_password()
+logging.info("jvb_auth_password: " + jvb_auth_password)
 jigasi_xmpp_password = generate_random_password()
+logging.info("jigasi_xmpp_password: " + jigasi_xmpp_password)
 jibri_recorded_password = generate_random_password()
+logging.info("jibri_recorded_password: " + jibri_recorded_password)
 jibri_xmpp_password = generate_random_password()
+logging.info("jibri_xmpp_password: " + jibri_xmpp_password)
 
 alpine = {
     "image": "alpine",
