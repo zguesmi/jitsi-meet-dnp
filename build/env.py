@@ -138,23 +138,3 @@ jvb = {
     "JVB_ENABLE_APIS" : os.getenv("JVB_ENABLE_APIS"),
     "TZ" : os.getenv("TZ")
 }
-
-
-# alpine = {
-#     "image": "alpine",
-#     "container_name": "alpine",
-#     "env": {
-#         "VERSION": stack_version
-#     },
-#     "ports": {
-#         800: 80,
-#         4430: 443
-#     },
-#     "network": docker_network_name,
-#     "volumes": {
-#         "/home/zied/projects/jitsi-meet-dnp/volume": {
-#             "bind": "/alpine",
-#             "mode": "Z"
-#         },
-#     }
-# }

@@ -3,7 +3,7 @@ import os
 import docker
 import time
 
-import jitsi
+import env
 
 
 logging.basicConfig(level=logging.INFO)
@@ -89,7 +89,7 @@ class App():
                     "mode": "Z"
                 },
             },
-            env=jitsi.prosody,
+            env=env.prosody,
             restart_policy={
                 "Name": self.restart_policy,
                 "MaximumRetryCount": 5
@@ -120,7 +120,7 @@ class App():
                     "mode": "Z"
                 },
             },
-            env=jitsi.web,
+            env=env.web,
             restart_policy={
                 "Name": self.restart_policy,
                 "MaximumRetryCount": 5
@@ -140,7 +140,7 @@ class App():
                     "mode": "Z"
                 },
             },
-            env=jitsi.jicofo,
+            env=env.jicofo,
             restart_policy={
                 "Name": self.restart_policy,
                 "MaximumRetryCount": 5
@@ -163,7 +163,7 @@ class App():
                     "mode": "Z"
                 },
             },
-            env=jitsi.jvb,
+            env=env.jvb,
             restart_policy={
                 "Name": self.restart_policy,
                 "MaximumRetryCount": 5

@@ -10,12 +10,7 @@ ENV PYTHONUNBUFFERED 1
 RUN apk add bash
 RUN python -m pip install docker
 
-# ENV CONFIG ~/.jitsi-meet-cfg
-# RUN bash -c "mkdir -p ${CONFIG}/{web/letsencrypt,transcripts,prosody/config,prosody/prosody-plugins-custom,jicofo,jvb,jigasi,jibri}"
-# RUN echo $CONFIG
-
 COPY main.py /app/main.py
-COPY jitsi.py /app/jitsi.py
+COPY env.py /app/env.py
 
-EXPOSE ${HTTP_PORT} ${HTTPS_PORT}
 CMD ["python", "/app/main.py"]
