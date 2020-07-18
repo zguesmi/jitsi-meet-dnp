@@ -4,9 +4,11 @@ volumes:
   jitsi-data:
 
 services:
-  jitsi-meet-dnp.public.dappnode.eth:
-    image: zguesmi/jitsi-meet-dnp:0.0.1
-    container_name: jitsi-meet-dnp.public.dappnode.eth
+  jitsi-meet.public.dappnode.eth:
+    # image: zguesmi/jitsi-meet-dnp:0.0.1
+    image: jitsi-meet.public.dappnode.eth:0.1.0
+    build: ./build
+    container_name: jitsi-meet.public.dappnode.eth
     volumes:
       - jitsi-data:/jitsi-meet-cfg
       - /var/run/docker.sock:/var/run/docker.sock
