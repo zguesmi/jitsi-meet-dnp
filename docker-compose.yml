@@ -26,7 +26,8 @@ services:
       # System time zone
       - TZ=Europe/Paris
       # Public URL for the web service
-      # - PUBLIC_URL=https://meet.example.com
+      # https://meet.example.com
+      - PUBLIC_URL=
       # IP address of the Docker host
       # See the "Running behind NAT or on a LAN environment" section in the README
       # - DOCKER_HOST_ADDRESS=192.168.1.1
@@ -35,11 +36,13 @@ services:
       ### Let's Encrypt configuration
       #
       # Enable Let's Encrypt certificate generation
-      # - ENABLE_LETSENCRYPT=1
+      # Comment this to disable SSL
+      - ENABLE_LETSENCRYPT=1
       # Domain for which to generate the certificate
-      # - LETSENCRYPT_DOMAIN=meet.example.com
+      # meet.example.com
+      - LETSENCRYPT_DOMAIN=
       # E-Mail for receiving important account notifications (mandatory)
-      # - LETSENCRYPT_EMAIL=alice@atlanta.net
+      - LETSENCRYPT_EMAIL=
 
       ### Etherpad integration (for document sharing)
       #
