@@ -69,7 +69,7 @@ class Jitsi():
             exit(1)
 
     """
-    Jitsi XMPP component.
+    Jitsi XMPP component (prosody).
     """
     def start_xmpp_server(self):
         prosody_container = DockerService(
@@ -197,12 +197,12 @@ if __name__ == "__main__":
     try:
         prosody_container = jitsi.start_xmpp_server()
         log.info("Prosody container id: " + prosody_container.id)
-        web_container = jitsi.start_web_component()
-        log.info("Web container id: " + web_container.id)
         jicofo_container = jitsi.start_focus_component()
         log.info("Jicofo container id: " + jicofo_container.id)
         jvb_container = jitsi.start_video_bridge()
         log.info("Jvb container id: " + jvb_container.id)
+        web_container = jitsi.start_web_component()
+        log.info("Web container id: " + web_container.id)
         prosody_container.wait()
     except Exception as e:
         log.exception(e)
