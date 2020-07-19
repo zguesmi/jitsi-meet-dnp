@@ -1,0 +1,32 @@
+{
+    "version": "2",
+    "fields": [
+        {
+            "id": "public-url",
+            "target": {
+                "type": "environment",
+                "name": "PUBLIC_URL"
+            },
+            "title": "Public URL",
+            "description": "Enter your instance's public URL"
+        },
+        {
+            "id": "Letsencrypt-domain",
+            "target": {
+                "type": "environment",
+                "name": "LETSENCRYPT_DOMAIN"
+            },
+            "title": "Letsencrypt domain",
+            "description": "Enter Letsencrypt domain to obtain a valid SSL certificate"
+        },
+        {
+            "id": "letsencrypt-email",
+            "target": {
+                "type": "environment",
+                "name": "LETSENCRYPT_EMAIL"
+            },
+            "title": "Letsencrypt email",
+            "description": "Enter an email to receive letencrypt messages"
+        }
+    ]
+}
