@@ -1,14 +1,23 @@
 {
     "name": "jitsi-meet.public.dappnode.eth",
     "version": "0.1.0",
-    "description": "Dappnode package to self-host a Jitsi meet instance https://jitsi.org/jitsi-meet/",
+    "upstreamVersion": "stable-4548",
+    "shortDescription": "Self-hosted Jitsi meet instance",
+    "description": "[Jitsi meet](https://jitsi.org/jitsi-meet/) is a free & open-source video conferencing for web & mobile. No accounts needed, you can make calls anonymously via a simple, custom URL.",
     "type": "service",
-    "author": "Zied Guesmi",
+    "author": "Zied GUESMI (https://github.com/zguesmi)",
     "categories": [
         "Communications"
     ],
     "links": {
         "homepage": "https://github.com/zguesmi/jitsi-meet-dnp"
     },
-    "license": "GLP-2.0"
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/zguesmi/jitsi-meet-dnp.git"
+    },
+    "bugs": {
+        "url": "https://github.com/zguesmi/jitsi-meet-dnp/issues"
+    },
+    "license": "GLP-3.0"
 }
