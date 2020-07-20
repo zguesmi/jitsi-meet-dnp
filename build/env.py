@@ -23,7 +23,7 @@ log.info("jigasi_xmpp_password: " + jigasi_xmpp_password)
 jibri_recorded_password = generate_random_password()
 log.info("jibri_recorded_password: " + jibri_recorded_password)
 jibri_xmpp_password = generate_random_password()
-log.info("jibri_xmpp_password: " + jibri_xmpp_password)
+log.info("jibri_xmpp_password: " + jibri_xmpp_password + "\n")
 
 prosody = {
     "AUTH_TYPE" : os.getenv("AUTH_TYPE"),
