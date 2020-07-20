@@ -3,7 +3,6 @@ import os
 import docker
 import signal
 import time
-
 import env
 
 
@@ -54,6 +53,7 @@ class DockerService():
 
 class Jitsi():
 
+    docker_network = None
     prosody_container = None
     web_container = None
     jicofo_container = None
@@ -69,7 +69,6 @@ class Jitsi():
         self.https_port = os.getenv("HTTPS_PORT")
         self.docker_network_name = os.getenv("DOCKER_NETWORK_NAME")
         self.client = docker.from_env()
-        self.docker_network = None
 
     def create_config_tree(self):
         log.info("Creating config tree [root_dir:{}]".format(self.config_root_dir))
@@ -227,7 +226,7 @@ if __name__ == "__main__":
         log.info("All services are up")
         jitsi.wait_services()
     except Exception as e:
-        log.error("Error in main method")
+        log.error("Error in main thread")
         log.exception(e)
         exit(1)
 
