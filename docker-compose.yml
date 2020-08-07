@@ -1,16 +1,12 @@
 version: "3.4"
 
-volumes:
-  jitsi-data:
-
 services:
   jitsi-meet.public.dappnode.eth:
-    # image: zguesmi/jitsi-meet-dnp:0.0.1
     image: jitsi-meet.public.dappnode.eth:0.1.0
     build: ./build
     container_name: jitsi-meet.public.dappnode.eth
     volumes:
-      - jitsi-data:/jitsi-meet-cfg
+      - /var/lib/jitsi-meet:/var/lib/jitsi-meet
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       ### Basic configuration options
@@ -18,7 +14,7 @@ services:
       - STACK_VERSION=stable-4548
       - LOG_LEVEL=info
       # Directory where all configuration will be stored
-      - CONFIG_ROOT_DIR=/jitsi-meet-cfg
+      - CONFIG_ROOT_DIR=/var/lib/jitsi-meet
       # Exposed HTTP port
       - HTTP_PORT=80
       # Exposed HTTPS port
@@ -31,7 +27,7 @@ services:
       # IP address of the Docker host
       # See the "Running behind NAT or on a LAN environment" section in the README
       # - DOCKER_HOST_ADDRESS=192.168.1.1
-      - DOCKER_NETWORK_NAME=jitsi-meet-dnp-net
+      - DOCKER_NETWORK_NAME=jitsi-meet-net
 
       ### Let's Encrypt configuration
       #
@@ -85,8 +81,6 @@ services:
       # - JWT_ALLOW_EMPTY
       # - JWT_AUTH_TYPE
       # - JWT_TOKEN_AUTH_MODULE
-
-
 
       # LDAP authentication (for more information see the Cyrus SASL saslauthd.conf man page)
       #
@@ -236,7 +230,7 @@ services:
       # - ENABLE_HTTP_REDIRECT=1
       # Container restart policy
       # Defaults to unless-stopped
-  # - RESTART_POLICY=on-failure
+      # - RESTART_POLICY=on-failure
       - GLOBAL_MODULES
       - GLOBAL_CONFIG
     # restart: unless-stopped
