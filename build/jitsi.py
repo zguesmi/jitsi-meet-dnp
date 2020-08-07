@@ -1,6 +1,7 @@
 import logging
 import os
 import docker
+import shutil
 import signal
 import time
 
@@ -76,16 +77,11 @@ class Jitsi():
         signal.signal(signal.SIGTERM, self.purge_containers)
         # signal.signal(signal.SIGKILL, self.purge_containers)
 
-    def create_config_tree(self):
-        log.info("Creating config tree [root_dir:{}]".format(self.config_root_dir))
-        os.makedirs(self.config_root_dir + "/web/letsencrypt", exist_ok=True)
-        os.makedirs(self.config_root_dir + "/transcripts", exist_ok=True)
-        os.makedirs(self.config_root_dir + "/prosody/config", exist_ok=True)
-        os.makedirs(self.config_root_dir + "/prosody/prosody-plugins-custom", exist_ok=True)
-        os.makedirs(self.config_root_dir + "/jicofo", exist_ok=True)
-        os.makedirs(self.config_root_dir + "/jvb", exist_ok=True)
-        os.makedirs(self.config_root_dir + "/jigasi", exist_ok=True)
-        os.makedirs(self.config_root_dir + "/jibri", exist_ok=True)
+    def clean_config_tree(self):
+        log.info("Cleaning possible residual config files [root_dir:{}]".format(self.config_root_dir))
+        if os.path.exists(self.config_root_dir):
+            for folder in os.listdir(self.config_root_dir):
+                shutil.rmtree(os.path.join(self.config_root_dir, folder))
 
     def create_docker_network(self):
         try:
@@ -233,7 +229,7 @@ class Jitsi():
 
 if __name__ == "__main__":
     jitsi = Jitsi()
-    jitsi.create_config_tree()
+    jitsi.clean_config_tree()
     jitsi.create_docker_network()
     try:
         log.info("Running XMPP server (Prosody)")
