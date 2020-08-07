@@ -25,7 +25,7 @@ log.info("jibri_recorded_password: " + jibri_recorded_password)
 jibri_xmpp_password = generate_random_password()
 log.info("jibri_xmpp_password: " + jibri_xmpp_password + "\n")
 
-prosody = {
+xmpp = {
     "AUTH_TYPE" : os.getenv("AUTH_TYPE"),
     "ENABLE_AUTH" : os.getenv("ENABLE_AUTH"),
     "ENABLE_GUESTS" : os.getenv("ENABLE_GUESTS"),

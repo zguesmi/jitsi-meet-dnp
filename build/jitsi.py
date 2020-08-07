@@ -3,6 +3,7 @@ import os
 import docker
 import signal
 import time
+
 import env
 
 
@@ -11,6 +12,8 @@ logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
 class DockerService():
+
+    container = None
 
     def __init__(self, docker_client, image, container_name, ports, volumes, env, restart_policy):
         self.docker_client = docker_client
@@ -32,7 +35,7 @@ class DockerService():
 
     def run(self):
         try:
-            container = self.docker_client.containers.run(
+            self.container = self.docker_client.containers.run(
                 self.image,
                 name=self.container_name,
                 environment=self.env,
@@ -43,8 +46,8 @@ class DockerService():
                 remove=True
             )
             log.info("Started container [container_name:{}, container_id:{}]"
-                    .format(self.container_name, container.id))
-            return container
+                    .format(self.container_name, self.container.id))
+            return self.container
         except Exception as e:
             log.error("Error running container [container_name:{}]".format(self.container_name))
             log.error(e)
@@ -54,21 +57,24 @@ class DockerService():
 class Jitsi():
 
     docker_network = None
-    prosody_container = None
-    web_container = None
-    jicofo_container = None
-    jvb_container = None
+    xmpp_service = None
+    web_component = None
+    jicofo_service = None
+    jvb_service = None
 
     def __init__(self):
         self.config_root_dir = os.getenv("CONFIG_ROOT_DIR")
         self.stack_version = os.getenv("STACK_VERSION")
         self.restart_policy = os.getenv("RESTART_POLICY")
         self.internal_xmpp_domain = os.getenv("XMPP_DOMAIN")
-        self.xmpp_server = os.getenv("XMPP_SERVER")
+        self.xmpp_server_name = os.getenv("XMPP_SERVER")
         self.http_port = os.getenv("HTTP_PORT")
         self.https_port = os.getenv("HTTPS_PORT")
         self.docker_network_name = os.getenv("DOCKER_NETWORK_NAME")
         self.client = docker.from_env()
+        signal.signal(signal.SIGINT, self.purge_containers)
+        signal.signal(signal.SIGTERM, self.purge_containers)
+        # signal.signal(signal.SIGKILL, self.purge_containers)
 
     def create_config_tree(self):
         log.info("Creating config tree [root_dir:{}]".format(self.config_root_dir))
@@ -97,10 +103,10 @@ class Jitsi():
     Jitsi XMPP component (prosody).
     """
     def start_xmpp_server(self):
-        self.prosody_container = DockerService(
+        self.xmpp_service = DockerService(
             docker_client=self.client,
             image="jitsi/prosody:" + self.stack_version,
-            container_name="jitsi-prosody",
+            container_name="jitsi-xmpp",
             ports={
                 "5222": None,
                 "5280": None,
@@ -116,19 +122,21 @@ class Jitsi():
                     "mode": "Z"
                 },
             },
-            env=env.prosody,
+            env=env.xmpp,
             restart_policy={
                 "Name": self.restart_policy,
                 "MaximumRetryCount": 5
             }
-        ).remove_if_present(True).run()
-        self.docker_network.connect(container=self.prosody_container, aliases=[self.xmpp_server])
+        )
+        self.xmpp_service.remove_if_present(force=True)
+        self.xmpp_service.run()
+        self.docker_network.connect(container=self.xmpp_service.container, aliases=[self.xmpp_server_name])
 
     """
     Jitsi web component.
     """
     def start_web_component(self):
-        self.web_container = DockerService(
+        self.web_component = DockerService(
             docker_client=self.client,
             image="jitsi/web:" + self.stack_version,
             container_name="jitsi-web",
@@ -155,14 +163,16 @@ class Jitsi():
                 "Name": self.restart_policy,
                 "MaximumRetryCount": 5
             }
-        ).remove_if_present(True).run()
-        self.docker_network.connect(container=self.web_container, aliases=[self.internal_xmpp_domain])
+        )
+        self.web_component.remove_if_present(force=True)
+        self.web_component.run()
+        self.docker_network.connect(container=self.web_component.container, aliases=[self.internal_xmpp_domain])
 
     """
     Jitsi focus component.
     """
     def start_focus_component(self):
-        self.jicofo_container = DockerService(
+        self.jicofo_service = DockerService(
             docker_client=self.client,
             image="jitsi/jicofo:" + self.stack_version,
             container_name="jitsi-jicofo",
@@ -178,14 +188,16 @@ class Jitsi():
                 "Name": self.restart_policy,
                 "MaximumRetryCount": 5
             }
-        ).remove_if_present(True).run()
-        self.docker_network.connect(container=self.jicofo_container)
+        )
+        self.jicofo_service.remove_if_present(force=True)
+        self.jicofo_service.run()
+        self.docker_network.connect(container=self.jicofo_service.container)
 
     """
     Jitsi video bridge component.
     """
     def start_video_bridge(self):
-        self.jvb_container = DockerService(
+        self.jvb_service = DockerService(
             docker_client=self.client,
             image="jitsi/jvb:" + self.stack_version,
             container_name="jitsi-jvb",
@@ -204,11 +216,20 @@ class Jitsi():
                 "Name": self.restart_policy,
                 "MaximumRetryCount": 5
             }
-        ).remove_if_present(True).run()
-        self.docker_network.connect(container=self.jvb_container)
+        )
+        self.jvb_service.remove_if_present(force=True)
+        self.jvb_service.run()
+        self.docker_network.connect(container=self.jvb_service.container)
 
-    def wait_services(self):
-        self.prosody_container.wait()
+    def wait(self):
+        self.xmpp_service.container.wait()
+
+    def purge_containers(self):
+        self.web_component.remove_if_present(force=True)
+        self.jvb_service.remove_if_present(force=True)
+        self.jicofo_service.remove_if_present(force=True)
+        self.xmpp_service.remove_if_present(force=True)
+
 
 if __name__ == "__main__":
     jitsi = Jitsi()
@@ -216,33 +237,34 @@ if __name__ == "__main__":
     jitsi.create_docker_network()
     try:
         log.info("Running XMPP server (Prosody)")
-        prosody_container = jitsi.start_xmpp_server()
-        log.info("Running focus component service (Jicofo)")
-        jicofo_container = jitsi.start_focus_component()
-        log.info("Running video bridge service (Jvb)")
-        jvb_container = jitsi.start_video_bridge()
-        log.info("Running Web service")
-        web_container = jitsi.start_web_component()
+        jitsi.start_xmpp_server()
+        log.info("Running focus component (Jicofo)")
+        jitsi.start_focus_component()
+        log.info("Running video bridge (Jvb)")
+        jitsi.start_video_bridge()
+        log.info("Running web component")
+        jitsi.start_web_component()
         log.info("All services are up")
-        jitsi.wait_services()
+        jitsi.wait()
     except Exception as e:
+        jitsi.purge_containers()
         log.error("Error in main thread")
         log.exception(e)
         exit(1)
 
 # class GracefulKiller:
-#   kill_now = False
-#   def __init__(self):
-#     signal.signal(signal.SIGTERM, self.purge_jitsi_containers)
-#     signal.signal(signal.SIGKILL, self.purge_jitsi_containers)
+#     kill_now = False
+#     def __init__(self):
+#         signal.signal(signal.SIGINT, self.exit_gracefully)
+#         signal.signal(signal.SIGTERM, self.exit_gracefully)
+#         # signal.signal(signal.SIGKILL, self.exit_gracefully)
 
-#   def purge_jitsi_containers(self, signum, frame):
-#     self.kill_now = True
+#     def exit_gracefully(self, signum, frame):
+#         self.kill_now = True
 
 # if __name__ == "__main__":
-#   killer = GracefulKiller()
-#   while not killer.kill_now:
-#     time.sleep(1)
-#     print("doing something in a loop ...")
-
-#   print("End of the program. I was killed gracefully :)")
+#     killer = GracefulKiller()
+#     while not killer.kill_now:
+#         time.sleep(1)
+#         print("doing something in a loop ...")
+#     print("End of the program. I was killed gracefully :)")
