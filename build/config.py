@@ -5,7 +5,7 @@ import string
 
 
 # TODO: format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=os.getenv("LOG_LEVEL"))
 log = logging.getLogger(__name__)
 
 def generate_random_password():
@@ -171,6 +171,7 @@ jicofo = {
             "mode": "Z"
         },
     },
+    "network_aliases": [],
     "restart_policy": {
         "Name": restart_policy,
         "MaximumRetryCount": 5
@@ -208,6 +209,7 @@ jvb = {
             "mode": "Z"
         },
     },
+    "network_aliases": [],
     "restart_policy": {
         "Name": restart_policy,
         "MaximumRetryCount": 5

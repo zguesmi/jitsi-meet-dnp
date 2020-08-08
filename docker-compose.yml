@@ -12,7 +12,7 @@ services:
       ### Basic configuration options
       #
       - STACK_VERSION=stable-4548
-      - LOG_LEVEL=info
+      - LOG_LEVEL=INFO
       # Directory where all configuration will be stored
       - CONFIG_ROOT_DIR=/var/lib/jitsi-meet
       # Exposed HTTP port

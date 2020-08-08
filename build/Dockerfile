@@ -9,7 +9,6 @@ ENV PYTHONUNBUFFERED 1
 RUN apk add bash
 RUN python -m pip install docker
 
-COPY jitsi.py /app/jitsi.py
-COPY env.py /app/env.py
+COPY jitsi.py config.py /app/
 
 CMD ["python", "/app/jitsi.py"]
