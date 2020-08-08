@@ -12,6 +12,7 @@ def generate_random_password():
     alphabet = string.ascii_letters + string.digits
     return ''.join(secrets.choice(alphabet) for i in range(32))
 
+print()
 __jicofo_component_secret = generate_random_password()
 log.info("jicofo_component_secret: " + __jicofo_component_secret)
 __jicofo_auth_password = generate_random_password()
@@ -23,7 +24,7 @@ log.info("jigasi_xmpp_password: " + __jigasi_xmpp_password)
 __jibri_recorded_password = generate_random_password()
 log.info("jibri_recorded_password: " + __jibri_recorded_password)
 __jibri_xmpp_password = generate_random_password()
-log.info("jibri_xmpp_password: " + __jibri_xmpp_password + "\n")
+log.info("jibri_xmpp_password: " + __jibri_xmpp_password)
 
 stack_version = os.getenv("STACK_VERSION")
 config_root_dir = os.getenv("CONFIG_ROOT_DIR")

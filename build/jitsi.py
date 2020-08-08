@@ -87,7 +87,11 @@ class Service:
             log.error(e)
     
     def remove(self):
-        self.container.remove(v=True, force=True)
+        try:
+            self.container.remove(v=True, force=True)
+            log.info(f"Removed container [name:{self.container.name}]")
+        except Exception as e:
+            log.error(f"Error removing container [name:{self.container.name}]")
 
 
 class App():
@@ -117,7 +121,11 @@ class App():
         self.web_component = Service(service_config=config.web, network=self.docker_network)
         self.web_component.start()
         log.info("All services are up")
-        self.xmpp_service.container.wait()
+        try:
+            self.xmpp_service.container.wait(condition="removed")
+        except Exception as e:
+            log.error("Cannot wait XMPP service anymore")
+            self.tear_down()
 
     def tear_down(self):
         self.web_component.remove()
