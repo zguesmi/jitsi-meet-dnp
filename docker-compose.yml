@@ -33,7 +33,7 @@ services:
       #
       # Enable Let's Encrypt certificate generation
       # Comment this to disable SSL
-      - ENABLE_LETSENCRYPT=1
+      - ENABLE_LETSENCRYPT=
       # Domain for which to generate the certificate
       # meet.example.com
       - LETSENCRYPT_DOMAIN=
