@@ -21,21 +21,20 @@ services:
       - HTTPS_PORT=443
       # System time zone
       - TZ=Europe/Paris
-      # Public URL for the web service
-      # https://meet.example.com
-      - PUBLIC_URL=
       # IP address of the Docker host
       # See the "Running behind NAT or on a LAN environment" section in the README
       # - DOCKER_HOST_ADDRESS=192.168.1.1
       - DOCKER_NETWORK_NAME=jitsi-meet-net
 
+      ### Public URL for the web service. Exp: https://meet.example.com
+      - PUBLIC_URL=
+
       ### Let's Encrypt configuration
       #
       # Enable Let's Encrypt certificate generation
-      # Comment this to disable SSL
+      # ENABLE_LETSENCRYPT=1 to enable it, keep empty to disable.
       - ENABLE_LETSENCRYPT=
-      # Domain for which to generate the certificate
-      # meet.example.com
+      # Domain for which to generate the certificate. Exp: meet.example.com
       - LETSENCRYPT_DOMAIN=
       # E-Mail for receiving important account notifications (mandatory)
       - LETSENCRYPT_EMAIL=
