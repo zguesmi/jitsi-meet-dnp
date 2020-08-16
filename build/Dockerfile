@@ -7,8 +7,8 @@ ENV PYTHONUNBUFFERED 1
 
 # Install requirements
 RUN apk add bash
-RUN python -m pip install docker
+RUN python -m pip install docker pyfiglet
 
-COPY jitsi.py config.py /app/
+COPY jitsi.py utils.py /app/
 
 CMD ["python", "/app/jitsi.py"]

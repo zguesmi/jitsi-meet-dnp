@@ -1,3 +1,4 @@
+import docker
 import logging
 import os
 import secrets
@@ -8,14 +9,18 @@ import string
 logging.basicConfig(level=os.getenv("LOG_LEVEL"))
 log = logging.getLogger(__name__)
 
-def getLogger():
+def get_logger():
     return log
+
+def exit_app():
+    log.info("Exiting...")
+    exit(1)
 
 def generate_random_alphanumeric_string(length):
     alphabet = string.ascii_letters + string.digits
     return ''.join(secrets.choice(alphabet) for i in range(length))
 
-class Secrets:
+class AppSecrets:
     def __init__(self):
         secret_length = 32
         self.jicofo_component_secret = generate_random_alphanumeric_string(secret_length)
@@ -25,24 +30,35 @@ class Secrets:
         self.jibri_recorded_password = generate_random_alphanumeric_string(secret_length)
         self.jibri_xmpp_password = generate_random_alphanumeric_string(secret_length)
 
-class Configuration:
+
+class ContainerConfig:
+    def __init__(self, image, container_name, ports, volumes, network_aliases, restart_policy, env):
+        self.image = image
+        self.container_name = container_name
+        self.ports = ports
+        self.volumes = volumes
+        # "network": self.docker_network,
+        self.network_aliases = network_aliases
+        self.restart_policy = restart_policy
+        self.env = env
+
+
+class AppConfig:
     def __init__(self):
         self.stack_version = os.getenv("STACK_VERSION")
         self.config_root_dir = os.getenv("CONFIG_ROOT_DIR")
         self.restart_policy = os.getenv("RESTART_POLICY")
         self.docker_network_name = os.getenv("DOCKER_NETWORK_NAME")
-        self.secrets = Secrets()
-
-    def get_xmpp_config(self):
-        return {
-            "image": "jitsi/prosody:" + self.stack_version,
-            "container_name": "jitsi-xmpp",
-            "ports": {
+        self.secrets = AppSecrets()
+        self.xmpp_container_config = ContainerConfig(
+            image=f"jitsi/prosody:{self.stack_version}",
+            container_name="jitsi-xmpp",
+            ports={
                 "5222": None,
                 "5280": None,
                 "5347": None,
             },
-            "volumes": {
+            volumes={
                 f"{self.config_root_dir}/prosody/config": {
                     "bind": "/config",
                     "mode": "Z"
@@ -50,15 +66,14 @@ class Configuration:
                 f"{self.config_root_dir}/prosody/prosody-plugins-custom": {
                     "bind": "/prosody-plugins-custom",
                     "mode": "Z"
-                },
+                }
             },
-            # "network": self.docker_network,
-            "network_aliases": [os.getenv("XMPP_SERVER")],
-            "restart_policy": {
+            network_aliases=[os.getenv("XMPP_SERVER")],
+            restart_policy={
                 "Name": self.restart_policy,
                 "MaximumRetryCount": 5
             },
-            "env": {
+            env={
                 "AUTH_TYPE": os.getenv("AUTH_TYPE"),
                 "ENABLE_AUTH": os.getenv("ENABLE_AUTH"),
                 "ENABLE_GUESTS": os.getenv("ENABLE_GUESTS"),
@@ -108,17 +123,15 @@ class Configuration:
                 "LOG_LEVEL": os.getenv("LOG_LEVEL"),
                 "TZ": os.getenv("TZ")
             },
-        }
-
-    def get_web_config(self):
-        return {
-            "image": "jitsi/web:" +self.stack_version,
-            "container_name": "jitsi-web",
-            "ports": {
+        )
+        self.web_container_config = ContainerConfig(
+            image=f"jitsi/web:{self.stack_version}",
+            container_name="jitsi-web",
+            ports={
                 "80": int(os.getenv("HTTP_PORT")),
                 "443": int(os.getenv("HTTPS_PORT"))
             },
-            "volumes": {
+            volumes={
                 f"{self.config_root_dir}/web": {
                     "bind": "/config",
                     "mode": "Z"
@@ -132,12 +145,12 @@ class Configuration:
                     "mode": "Z"
                 },
             },
-            "network_aliases": [os.getenv("XMPP_DOMAIN")],
-            "restart_policy": {
+            network_aliases=[os.getenv("XMPP_DOMAIN")],
+            restart_policy={
                 "Name": self.restart_policy,
                 "MaximumRetryCount": 5
             },
-            "env": {
+            env={
                 "ENABLE_AUTH": os.getenv("ENABLE_AUTH"),
                 "ENABLE_GUESTS": os.getenv("ENABLE_GUESTS"),
                 "ENABLE_LETSENCRYPT": "1" if os.getenv("ENABLE_LETSENCRYPT").lower == "true" else "",
@@ -164,25 +177,23 @@ class Configuration:
                 "JIBRI_RECORDER_PASSWORD": self.secrets.jibri_recorded_password,
                 "ENABLE_RECORDING": os.getenv("ENABLE_RECORDING")
             }
-        }
-
-    def get_jicofo_config(self):
-        return {
-            "image": f"jitsi/jicofo:{self.stack_version}",
-            "container_name": "jitsi-jicofo",
-            "ports": {},
-            "volumes": {
+        )
+        self.jicofo_container_config = ContainerConfig(
+            image=f"jitsi/jicofo:{self.stack_version}",
+            container_name="jitsi-jicofo",
+            ports={},
+            volumes={
                 f"{self.config_root_dir}/jicofo": {
                     "bind": "/config",
                     "mode": "Z"
                 },
             },
-            "network_aliases": [],
-            "restart_policy": {
+            network_aliases=[],
+            restart_policy={
                 "Name": self.restart_policy,
                 "MaximumRetryCount": 5
             },
-            "env": {
+            env={
                 "AUTH_TYPE": os.getenv("AUTH_TYPE"),
                 "ENABLE_AUTH": os.getenv("ENABLE_AUTH"),
                 "XMPP_DOMAIN": os.getenv("XMPP_DOMAIN"),
@@ -200,28 +211,26 @@ class Configuration:
                 "JIBRI_PENDING_TIMEOUT": os.getenv("JIBRI_PENDING_TIMEOUT"),
                 "TZ": os.getenv("TZ"),
             }
-        }
-
-    def get_jvb_config(self):
-        return {
-            "image": f"jitsi/jvb:{self.stack_version}",
-            "container_name": "jitsi-jvb",
-            "ports": {
+        )
+        self.jvb_container_config = ContainerConfig(
+            image=f"jitsi/jvb:{self.stack_version}",
+            container_name="jitsi-jvb",
+            ports={
                 os.getenv("JVB_PORT") + "/udp": os.getenv("JVB_PORT"),
                 os.getenv("JVB_TCP_PORT"): os.getenv("JVB_TCP_MAPPED_PORT")
             },
-            "volumes": {
+            volumes={
                 f"{self.config_root_dir}/jvb": {
                     "bind": "/config",
                     "mode": "Z"
                 },
             },
-            "network_aliases": [],
-            "restart_policy": {
+            network_aliases=[],
+            restart_policy={
                 "Name": self.restart_policy,
                 "MaximumRetryCount": 5
             },
-            "env": {
+            env={
                 "DOCKER_HOST_ADDRESS": os.getenv("DOCKER_HOST_ADDRESS"),
                 "XMPP_AUTH_DOMAIN": os.getenv("XMPP_AUTH_DOMAIN"),
                 "XMPP_INTERNAL_MUC_DOMAIN": os.getenv("XMPP_INTERNAL_MUC_DOMAIN"),
@@ -236,12 +245,66 @@ class Configuration:
                 "JVB_ENABLE_APIS": os.getenv("JVB_ENABLE_APIS"),
                 "TZ": os.getenv("TZ")
             }
-        }
+        )
 
-    def print_secrets(self):
-        log.info(f"jicofo_component_secret: {self.secrets.jicofo_component_secret}")
-        log.info(f"jicofo_auth_password: {self.secrets.jicofo_auth_password}")
-        log.info(f"jvb_auth_password: {self.secrets.jvb_auth_password}")
-        log.info(f"jigasi_xmpp_password: {self.secrets.jigasi_xmpp_password}")
-        log.info(f"jibri_recorded_password: {self.secrets.jibri_recorded_password}")
-        log.info(f"jibri_xmpp_password: {self.secrets.jibri_xmpp_password}")
+
+class DockerHelper:
+
+    docker_client = docker.from_env()
+
+    @staticmethod
+    def get_version():
+        return DockerHelper.docker_client.version()["Version"]
+
+    @staticmethod
+    def remove_container_if_present(container_name):
+        try:
+            container = DockerHelper.docker_client.containers.get(container_name)
+            log.info(f"Removing existing container [name:{container_name}]")
+            container.remove(v=True, force=True)
+        except:
+            pass
+
+    @staticmethod
+    def create_container(container_config):
+        try:
+            container = DockerHelper.docker_client.containers.create(
+                container_config.image,
+                name=container_config.container_name,
+                environment=container_config.env,
+                ports=container_config.ports,
+                volumes=container_config.volumes,
+                restart_policy=container_config.restart_policy,
+            )
+            log.debug(f"Created container [name:{container.name}, id:{container.id}]")
+            return container
+        except Exception as e:
+            log.error(f"Error creating container [name:{container_config.container_name}]")
+            log.error(e)
+            return None
+
+    @staticmethod
+    def create_network(network_name):
+        try:
+            existing_network = DockerHelper.docker_client.networks.get(network_name)
+            log.debug(f"Docker network already exists [name:{existing_network.name}]")
+            return existing_network
+        except docker.errors.NotFound as e:
+            log.info(f"Creating docker network [name:{network_name}]")
+            return DockerHelper.docker_client.networks.create(network_name, driver="bridge")
+        except Exception as e:
+            log.error(f"Error creating docker network [name:{network_name}]")
+            log.error(e)
+            return None
+
+    @staticmethod
+    def pull_image(image_uri):
+        try:
+            log.info(f"Pulling image [uri:{image_uri}]")
+            image = DockerHelper.docker_client.images.pull(image_uri)
+            log.debug(f"Pulled image [uri:{image_uri}]")
+            return image
+        except Exception as e:
+            log.error(f"Error pulling image [uri:{image_uri}]")
+            log.error(e)
+            return None
