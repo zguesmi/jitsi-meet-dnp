@@ -32,7 +32,7 @@ services:
       ### Let's Encrypt configuration
       #
       # Enable Let's Encrypt certificate generation
-      # ENABLE_LETSENCRYPT=1 to enable it, keep empty to disable.
+      # ENABLE_LETSENCRYPT=true (or True) to enable it, otherwise disabled.
       - ENABLE_LETSENCRYPT=
       # Domain for which to generate the certificate. Exp: meet.example.com
       - LETSENCRYPT_DOMAIN=

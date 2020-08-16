@@ -59,6 +59,9 @@ class DockerHelper:
 
 
 class Service:
+    """
+    Description goes here
+    """
 
     def __init__(self, service_config, network):
         DockerHelper.remove_container_if_present(service_config["container_name"])
@@ -135,6 +138,9 @@ class App():
 
 
 if __name__ == "__main__":
+    print("#" * 30)
+    print("Staring application")
+    print("#" * 30)
     app = App()
     try:
         app.run()
