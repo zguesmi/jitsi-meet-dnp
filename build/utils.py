@@ -9,9 +9,6 @@ import string
 logging.basicConfig(level=os.getenv("LOG_LEVEL"))
 log = logging.getLogger(__name__)
 
-def get_logger():
-    return log
-
 def exit_app():
     log.info("Exiting...")
     exit(1)

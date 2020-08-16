@@ -9,8 +9,9 @@ import utils
 from utils import DockerHelper
 from utils import AppConfig
 
-# logging
-log = utils.get_logger()
+# TODO: format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+logging.basicConfig(level=os.getenv("LOG_LEVEL"))
+log = logging.getLogger(__name__)
 
 
 class Service:
@@ -94,6 +95,8 @@ class App():
         log.info("Running web component")
         self.web_component.start()
         log.info("All services are up")
+
+    def wait(self):
         try:
             self.xmpp_service.container.wait(condition="removed")
         except Exception as e:
@@ -127,6 +130,7 @@ if __name__ == "__main__":
         app.setup()
         app.run()
         app.print_secrets()
+        app.wait()
     except Exception as e:
         app.tear_down()
         log.exception(e)
