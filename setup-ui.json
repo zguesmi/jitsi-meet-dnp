@@ -1,0 +1,14 @@
+{
+    "enableLetsencrypt": {
+        "ui:widget": "radio"
+    },
+    "letsencryptDomain": {
+        "ui:placeholder": "meet.example.com"
+    },
+    "letsencryptEmail": {
+        "ui:placeholder": "meet@example.com"
+    },
+    "publicUrl": {
+        "ui:placeholder": "https://meet.example.com"
+    }
+}

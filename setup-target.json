@@ -1,0 +1,18 @@
+{
+    "enableLetsencrypt": {
+      "type": "environment",
+      "name": "ENABLE_LETSENCRYPT"
+    },
+    "letsencryptDomain": {
+        "type": "environment",
+        "name": "LETSENCRYPT_DOMAIN"
+      },
+      "letsencryptEmail": {
+        "type": "environment",
+        "name": "LETSENCRYPT_EMAIL"
+      },
+      "publicUrl": {
+        "type": "environment",
+        "name": "PUBLIC_URL"
+      }
+  }

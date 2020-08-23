@@ -1,0 +1,38 @@
+{
+    "description": "This setup wizard will help you start. In case of problems, please file an issue @ https://github.com/zguesmi/jitsi-meet-dnp/issues",
+    "type": "object",
+    "required": ["enableLetsencrypt"],
+    "properties": {
+        "enableLetsencrypt": {
+            "title": "[Recommended] Enable Letsencrypt",
+            "type": "boolean",
+            "description": "This will enables TLS encrypted communication if you have a public domain address. You can disable it for local testing.",
+            "oneOf": [
+                {
+                    "title": "Enable",
+                    "const": true
+                },
+                {
+                    "title": "Disable",
+                    "const": false
+                }
+            ]
+        },
+        "letsencryptDomain": {
+            "title": "[Recommended] Letsencrypt domain",
+            "type": "string",
+            "description": "Domain for which you would want to obtain a valid Letsencrypt certificate"
+        },
+        "letsencryptEmail": {
+            "title": "[Recommended] Letsencrypt email",
+            "type": "string",
+            "description": "Enter a valid email address to receive important letencrypt notifications"
+        },
+        "publicUrl": {
+            "title": "Public URL",
+            "type": "string",
+            "description": "Public URL for the web service",
+            "pattern": "^https://"
+        }
+    }
+}
